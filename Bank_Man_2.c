@@ -3,15 +3,46 @@
 #include<stdlib.h>
 #include<stdbool.h>
 #include<unistd.h>
-//#include<Bank_Man.h>
 
 int num_users=0;
 char user_usernames[10][15]; //maximum users are 10 and max length of username is 15
 char user_passwords[10][15];
 float user_balances[10];
-enum defined_acc_types{Salary, FD, Savings, RD};
+enum defined_acc_types{Salary=1, FD, Savings, RD};
 char account_type[10];
 int user_arr_index=-1;
+
+bool IsStringSame(char dbString[], char inputString[])
+{
+    int lenDBString=0; 
+    int lenInputString=0;
+
+    for(int i=0; dbString[i] != '\0'; i++)
+    {
+        lenDBString++;
+    }
+    for(int i=0; inputString[i] != '\0'; i++)
+    {
+        lenInputString++;
+    }
+
+    //If Lengh of Both String is different, exit with false result
+    if(lenDBString != lenInputString)
+    {
+        return false;
+    }
+
+    //If Lengh of Both String is same, start comparing each character
+    for(int i=0; dbString[i] != '\0'; i++)
+    {
+        if(dbString[i] != inputString[i])
+        {
+            return false;
+        }
+    }
+
+    return true;    
+}
 
 void CreateAcc()
 {
@@ -98,22 +129,21 @@ void CreateAcc()
 
 bool Login()
 {
-    //Verify login credentials
-    //Need to check whether user exists. If not, redirect to main page
     char username[15], password[15];
     printf("Welcome back! Please login with your details!\n");
     printf("\n");
     printf("Enter username: ");
     scanf("%s", username);
+
     for(int i=0; i<num_users; i++)
     {
-        if(user_usernames[i]==username[i])
+
+        if(IsStringSame(user_usernames[i], username))
         {        
-            //printf("\n");
             printf("Enter password: ");
             scanf("%s", password);
 
-            if(user_passwords[i]==password[i])
+            if(IsStringSame(user_passwords[i], password))
             {
                 printf("\n");
                 printf("Logged in successfully!\n");
@@ -125,10 +155,17 @@ bool Login()
             }
             else
             {
+                printf("The entered password does not match with the username: %s\n", username);
+                printf("\n");
                 return false;   //Password is wrong
             }
         }
-        //return false;
+        else 
+        {
+                printf("The entered user does not exist: %s\n", username);
+                printf("\n");
+                return false;   //Username does not exist
+        }
     }
 }
 
@@ -146,6 +183,7 @@ int Deposit(int user_index, float amount)
 {
     user_balances[user_index] = user_balances[user_index] + amount;
     printf("%.2f deposited into your account!\n", amount);
+    printf("\n");
 }
 
 int Withdraw(int user_index, float amount)
@@ -154,13 +192,46 @@ int Withdraw(int user_index, float amount)
     {
         user_balances[user_index] = user_balances[user_index]- amount;
         printf("%.2f withdrawn successfully!\n", amount);
+        printf("\n");
     } 
     else 
     {
         printf("Insufficient balance! Please check your balance and try again\n");
+        printf("\n");
     }
 }
 
+
+char* Acc_type_name(enum defined_acc_types acc_type_prompt)    //Function to get account types from the defined ones in enum
+{
+    switch(acc_type_prompt) 
+    {
+        case Salary:
+            return "Salary";
+        case FD:
+            return "Fixed Deposit";
+        case Savings:
+            return "Savings";
+        case RD:
+            return "Recurring Deposit";
+        default:
+            return "Unknown";
+    }
+}
+
+
+void Acc_Details(int user_index)
+{
+    printf("\n");
+    printf("Fetching account details. . . \n");
+    printf("\n");
+    sleep(1);
+    printf("\n");
+    printf("Username:- %s\n", user_usernames[user_index]);
+    printf("Account Type: %s\n", Acc_type_name(account_type[user_index]));
+    printf("Account Balance: %.2f\n", user_balances[user_index]);
+    printf("\n");
+}
 
 int main()
 {
@@ -168,14 +239,14 @@ int main()
 
     do  //Looping until user enters 3 to exit
     {
-        printf("Welcome to Vijay Malya Bank! Please choose your option...\n");
+        printf("Welcome to ABCD Bank! Please choose your option...\n");
         printf("1. Create Account\n");
-        printf("2. Log into existing account\n");
+        printf("2. Login to existing account\n");
         printf("3. Exit\n");
         printf("\n");
 
         prompt_choice:                              //Label to prompt user to enter their choice
-            printf("Please enter your choice: ");
+            printf("Please enter your choice [1-3]: ");
             scanf("%d", &choice);
 
         switch(choice)
@@ -211,7 +282,8 @@ int main()
                         printf("1. Make a deposit\n");
                         printf("2. Withdraw money\n");
                         printf("3. Check available balance\n");
-                        printf("4. Logout");
+                        printf("4. Get account details\n");
+                        printf("5. Logout");
                         printf("\n");
 
                         prompt_action:                              //Label to prompt user to choose action
@@ -220,22 +292,35 @@ int main()
 
                         switch(user_action) {
                             case 1:
+                            {
                                 printf("Enter the amount to deposit: ");
                                 scanf("%f", &amount);
                                 Deposit(user_arr_index, amount);
                                 break;
+                            }
 
                             case 2:
+                            {
                                 printf("Enter the amount to withdraw: ");
                                 scanf("%f", &amount);
                                 Withdraw(user_arr_index, amount);
                                 break;
+                            }
 
                             case 3:
+                            {
                                 check_balance(user_arr_index);
                                 break;
-
+                            }
+                            
                             case 4:
+                            {
+                                Acc_Details(user_arr_index);
+                                break;
+                            }
+
+                            case 5:
+                            {
                                 printf("Logging out. . . \n");
                                 printf("\n");
                                 sleep(1);
@@ -243,16 +328,19 @@ int main()
                                 printf("Logged out successfully!\n");
                                 printf("\n");
                                 break;
+                            }
 
                             default:
+                            {
                                 printf("\n");
                                 printf("Invalid choice! Please choose the appropriate action from the above list\n");
                                 sleep(1);
                                 printf("\n");
                                 goto prompt_action;
+                            }
 
                         }
-                    } while (user_action!=4);
+                    } while (user_action!=5);
                     
                 }
                 else
@@ -275,7 +363,7 @@ int main()
             default:
             {
                 printf("\n");
-                printf("Invalid choice! Please choose the appropriate choice from the above list\n");
+                printf("Invalid choice! Please choose the appropriate choice (1 to 3) from the above list\n");
                 sleep(1);
                 printf("\n");
                 goto prompt_choice;
