@@ -12,14 +12,14 @@ struct accounts
     float user_balances;
     enum defined_acc_types{Salary=1, FD, Savings, RD};  //enum to assign a number to the type of account
     int account_type;
-    struct account *next;
+    struct accounts *next;
 };
 
 struct accounts *head=NULL;
 
 void CreateAcc()
 {
-    struct accounts *new_account = (struct account *)malloc(sizeof(struct accounts));
+    struct accounts *new_account = (struct accounts *)malloc(sizeof(struct accounts));
     if(new_account == NULL)
     {
         printf("\n");
@@ -105,7 +105,7 @@ void check_balance(struct accounts *account)
     printf("Fetching balance. . .\n");
     printf("\n");
     sleep(1);
-    printf("Current available balance is %.2f\n", account->user_balances);
+    printf("Current available balance is Rs. %.2f\n", account->user_balances);
     printf("\n");
 }
 
@@ -127,7 +127,7 @@ int Deposit(struct accounts *account)
     {
         account-> user_balances = account->user_balances + amount;
         printf("\n");
-        printf("%.2f deposited into your account!\n", amount);
+        printf("Rs. %.2f deposited into your account!\n", amount);
         printf("\n");
     }
 }
@@ -152,7 +152,7 @@ int Withdraw(struct accounts *account)
     {
         account -> user_balances = account -> user_balances - amount;
         printf("\n");
-        printf("%.2f withdrawn successfully!\n", amount);
+        printf("Rs. %.2f withdrawn successfully!\n", amount);
         printf("\n");
         sleep(0.5);
     } 
@@ -192,7 +192,7 @@ void Acc_Details(struct accounts *account)
         default:
             printf("Account Type: Unknown\n");
     }
-    printf("Account Balance: %.2f\n", account -> user_balances);
+    printf("Account Balance: Rs. %.2f\n", account -> user_balances);
     printf("\n");
     sleep(0.5);
 }
@@ -200,7 +200,7 @@ void Acc_Details(struct accounts *account)
 int main()
 {
     int choice, action;
-    int attempts=0;
+    int attempts=0;     //setting attempts to zero
 
     do  //Looping until user enters 3 to exit
     {
@@ -216,12 +216,12 @@ int main()
 
         switch(choice)
         {
-            case 1:
+            case 1:     //Create account
             {
                 CreateAcc();
                 break;
             }
-            case 2:
+            case 2:     //login and login functionalities
             {
                 struct accounts *current = NULL;
                 char username[15];
@@ -304,8 +304,8 @@ int main()
                     printf("Login failed!! Redirecting to homepage. . .\n");
                     printf("\n");
                     sleep(1);
-                    attempts++;
-                    if(attempts==3)
+                    attempts++;     //increment for every wrong attempt
+                    if(attempts==3)     //exit program if 3 wrong attempts
                     {
                         printf("\n");
                         printf("Maximux login attempts exceeded!! Please try again later!\n");
@@ -318,7 +318,7 @@ int main()
                 }
                 break;
             }
-            case 3:
+            case 3:     //Exit program
             {
                 printf("\n");
                 printf("Exiting....\n");
@@ -345,6 +345,7 @@ int main()
         struct accounts *temp = current;    //assign temp pointer to head node
         current = current->next;        //move current pointer to next node
         free(temp);         //free the previous node
+        temp = NULL;        //making temp as null to avoid dangling pointer
     }
 
     return 0;
